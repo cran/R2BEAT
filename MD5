@@ -1,0 +1,17 @@
+4f0aea2b8f50927568bc490f7abc8378 *DESCRIPTION
+43e958ede329eaf41e7dc1d631c95341 *NAMESPACE
+7ce5dc2833acb9f8f6140b0596986791 *R/beatcv.R
+4aa6907c7f9c8c87fbdc6b168dd38816 *R/beth1.R
+14ba3f87828fe06cc4ec29326959362e *R/beth2.R
+75e96de52ef22e9d1446183e38515085 *data/beat.example.rda
+d4a7c99fb84c91b92e37e7b3d7bbc9b1 *man/PSU_strat.Rd
+3f1c92c979f5432d9ff9a1b6ad47abbb *man/allocation.Rd
+57c15cd90123f8aa539342ca9f7e6607 *man/beth1.Rd
+2c7efcf95294b9507e0ce5b23713364e *man/beth2.Rd
+1110948dd2561d493c42f52d511bc877 *man/bethcv.Rd
+7eefc55873bcb17a550190570909cdc0 *man/deft_start.Rd
+5897e78b63b70af7f08bccfa312ad150 *man/design.Rd
+8a1de917d6be08cfd53dd5ec0d8bca15 *man/effst.Rd
+9e6034e2fb5677c3dcfba31c57ba4f7f *man/errors.Rd
+17f879b03a96770b06f960f373cac219 *man/rho.Rd
+11e93a2503abd0cabf017a8841a7ddb8 *man/strata.Rd
