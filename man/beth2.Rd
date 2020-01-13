@@ -76,7 +76,7 @@ des_file=design, psu_file=PSU_strat,rho=rho)
 # The total ammount of sample size is 191 PSU (36 SR + 155 NSR) and 15147 SSU. 
 
 ## Example 2
-# Assume 1300 SSUs is the maximum sample size to stick to our budget.
+# Assume 13000 SSUs is the maximum sample size to stick to our budget.
 # Look at the sensitivity is in DOM1 for REG1 and REG2 due to V1.
 allocation2st_1$sensitivity
 # We can relax the constraints increasing the expected coefficients of variation for X1 by 10%
@@ -114,7 +114,7 @@ allocation2st_3$expected
 allocation2st_4$expected
 
 ## Example 5
-# On the contrary, assume to increase the MINIMUM from 48 to 24.
+# On the contrary, assume to decrease the MINIMUM from 48 to 24.
 # The SSUs number strongly decrease in the face of an increase of PSUs,
 # always under the same expected errors.
 design2 <- design 
