@@ -1,3 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("stats", "aggregate")
 importFrom("utils", "read.table", "write.table")
+importFrom("plyr", "ldply","ddply",".")
+importFrom("sampling", "UPsampford")
+importFrom("devtools","install_github")

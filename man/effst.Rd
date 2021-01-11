@@ -10,7 +10,6 @@ Example data frame containing estimator effect, (\eqn{effst}), in each stratum f
 }
 \usage{
 data(beat.example)
-effst
 }
 \format{
   The estimator effect data frame contains a row per each stratum with the following variables: 

@@ -10,7 +10,6 @@ Example data frame containing precision levels (expressed in terms of acceptable
 }
 \usage{
 data(beat.example)
-errors
 }
 \format{
   The constraint data frame (errors) contains a row per each type of domain with the following variables:

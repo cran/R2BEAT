@@ -10,7 +10,6 @@ Example data frame containing intraclass correlation \eqn{\rho} in Self Represen
 }
 \usage{
 data(beat.example)
-rho
 }
 \format{
   The intraclass correlation coefficienta (\eqn{\rho}) data frame contains a row per each stratum with the following variables: 

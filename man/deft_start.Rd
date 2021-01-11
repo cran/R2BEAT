@@ -10,7 +10,6 @@ Example data frame containing the starting values for the Design Effect (\eqn{de
 }
 \usage{
 data(beat.example)
-deft_start
 }
 \format{
   The Design Effect data frame contains a row per each stratum with the following variables: 

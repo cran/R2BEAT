@@ -10,7 +10,6 @@ Example data frame containing information on Primary Stage Units (PSUs) stratifi
 }
 \usage{
 data(beat.example)
-PSU_strat
 }
 \format{
 The PSU_strat data frame contains a row for each Primary Stage Units (PSUs) with the following variables: 

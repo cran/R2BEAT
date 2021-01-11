@@ -10,7 +10,6 @@ Example data frame containing variables for describing the sampling design.
 }
 \usage{
 data(beat.example)
-design
 }
 \format{
   The design data frame contains a row per each stratum with the following variables: 

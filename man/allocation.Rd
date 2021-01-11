@@ -10,7 +10,7 @@ Example data frame containing a given allocation.
 }
 \usage{
 data(beat.example)
-allocation}
+}
 \format{
   The Strata data frame contains a row per each stratum with the following variables:
   \describe{

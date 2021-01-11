@@ -10,7 +10,6 @@ Example data frame containing information on strata characteristics.
 }
 \usage{
 data(beat.example)
-strata
 }
 \format{
   The Strata data frame contains a row per each stratum with the following variables: 

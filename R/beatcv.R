@@ -115,8 +115,32 @@ assign("cv",cv,envir=.BaseNamespaceEnv)
 
 assign("qu",qu,envir=.BaseNamespaceEnv)
 
+# New output (Barcaroli)
 
+exp_cv <- NULL
 
-return(cv)
+st1 <- "exp_cv$Type <- c(rep("
+st2 <- "exp_cv$Dom <- c(1:"
+
+for (i in (1:ndom)) {
+  if (i < ndom) st1 <- paste0(st1,"'DOM",i,"',",nvalues[i],"),rep(")
+  if (i == ndom) st1 <- paste0(st1,"'DOM",i,"',",nvalues[i],"))")
+  if (i < ndom) st2 <- paste0(st2,nvalues[i],",1:")
+  if (i == ndom) st2 <- paste0(st2,nvalues[i],")")
+}
+eval(parse(text=st1))
+eval(parse(text=st2))
+exp_cv <- as.data.frame(exp_cv)
+
+for (j in (1:nvar)) {
+  st <- paste0("exp_cv$V",j," <- c(")
+  for (i in (1:ndom)) {
+    if (i < ndom) st <- paste0(st,"cv$dom",i,"var",j,"$cv_dom",i,"var",j,",")
+    if (i == ndom) st <- paste0(st,"cv$dom",i,"var",j,"$cv_dom",i,"var",j,")")
+  }
+  eval(parse(text=st))
+}
+# return(cv)
+return(exp_cv)
 
 }

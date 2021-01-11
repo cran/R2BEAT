@@ -69,8 +69,8 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
   n <- ob$n
   n_1st <- n
 
-  iteractions<-data.frame(cbind(0,0,0,0,sum(n)))
-  colnames(iteractions)<-c("iteraction","PSU_SR","PSU NSR","PSU Total","SSU")
+  iterations<-data.frame(cbind(0,0,0,0,sum(n)))
+  colnames(iterations)<-c("iterations","PSU_SR","PSU NSR","PSU Total","SSU")
 
   des_file <- des_file[order(des_file$STRATUM), ]
   des_file$CAMP <- n
@@ -180,7 +180,7 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
       PSU_Total<-PSU_SR+PSU_NSR
 
       iter_new<-c(iterx,PSU_SR,PSU_NSR,PSU_Total,sum(n))
-      iteractions<-rbind(iteractions,iter_new)
+      iterations<-rbind(iterations,iter_new)
 
       diffx <- max(abs(n - des_file$CAMP))
       loopdeft$diff_n <- (abs(n - des_file$CAMP))
@@ -201,25 +201,26 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
                                                                                                                                                                                                 function(i) paste("DOM", i, sep = "")), "COST","CENS")]
     }
 
-    print(iteractions)
-    obb<-list(ob=ob,iteractions=iteractions)
+    print(iterations)
+    obb<-list(ob=ob,iterations=iterations)
     return(obb)
   }
 
   ob_fin<-newDeft(des_file, stratif, errors, rho, psu_file,deft)
 
-  iteractions<-ob_fin$iteraction
+  iterations<-ob_fin$iteration
   ob_fin<-ob_fin$ob
 
     n_2st <- ob_fin$n
 
-  Bethel_sample_n12 <- cbind(stratif[, c("STRATUM", "N", sapply(1:nvar,
-                                                                function(i) paste("DOM", i, sep = "")))], n_1st, n_2st)
+  Bethel_sample_n12 <- cbind(stratif[, c("STRATUM", "N", 
+                       sapply(1:ndom,function(i) paste("DOM", i, sep = "")))], 
+                       n_1st, n_2st)
 
   assign("test_stages", 0, envir = .BaseNamespaceEnv)
   output_beth12$n2_st <- n_2st
   output_beth12$Bethel_sample_n12 <- (cbind(stratif[, c("STRATUM",
-                                                        "N", sapply(1:nvar, function(i) paste("DOM", i, sep = "")))],
+                                                        "N", sapply(1:ndom, function(i) paste("DOM", i, sep = "")))],
                                             n_1st, n_2st))
 
   assign("output_beth12", output_beth12, envir = .BaseNamespaceEnv)
@@ -257,7 +258,7 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
   deft <- output_beth12$i_S_DEFT_loop
   deft_c <- cbind(STRATUM=file_strata$STRATUM,deft[,startsWith(colnames(deft),"DEFT")])
 
-  out<-list(iteractions=iteractions,file_strata=file_strata,alloc=alloc,planned=planned,expected=expected,sensitivity=sensitivity,deft_c=deft_c,param_alloc=param_alloc)
+  out<-list(iterations=iterations,file_strata=file_strata,alloc=alloc,planned=planned,expected=expected,sensitivity=sensitivity,deft_c=deft_c,param_alloc=param_alloc)
 
   return(out)
 
