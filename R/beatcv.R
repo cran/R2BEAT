@@ -111,9 +111,11 @@ names(qu)[k]<-nome2
 
 }
 
-assign("cv",cv,envir=.BaseNamespaceEnv)
+# assign("cv",cv,envir=.BaseNamespaceEnv)
+# assign("qu",qu,envir=.BaseNamespaceEnv)
 
-assign("qu",qu,envir=.BaseNamespaceEnv)
+cv<<-cv
+qu<<-qu
 
 # New output (Barcaroli)
 

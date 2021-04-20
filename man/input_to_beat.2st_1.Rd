@@ -47,7 +47,7 @@ target_vars <- c("income_hh",
                  "active",
                  "inactive",
                  "unemployed")         # target variables
-deff_vars <- "stratum"    # stratification variables for calculating deff and effst 
+deff_vars <- "stratum"    # stratification variables for calculating deff and effst
                           # (n.b: must coincide or be a subset of variables of stratification)
 id_PSU <- c("municipality")            # identification variable of PSUs
 id_SSU <- c("id_hh")                   # identification variable of SSUs
@@ -59,7 +59,7 @@ inp1 <- input_to_beat.2st_1(RGdes,
                             strata_vars,
                             target_vars,
                             deff_vars,
-                            domain_vars)							
+                            domain_vars)
 inp1$strata
 inp1$deff
 inp1$effst
