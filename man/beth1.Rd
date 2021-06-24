@@ -34,15 +34,15 @@ The generalized Bethel’s algorithm allows to determine the optimal sample size
   \emph{Sample allocation in multivariate surveys.}
   Survey methodology, 15.1: 47-57.
 
-  Cochran, W. (1977)
-  \emph{Sampling Techniques.}
+  Cochran, W. (1977) 
+  \emph{Sampling Techniques.} 
   John Wiley & Sons, Inc., New York
-
-  Neyman, J. (1934).
-  On the two different aspects of the representative method: the method of stratified sampling and the method of purposive selection.
+  
+  Neyman, J. (1934). 
+  On the two different aspects of the representative method: the method of stratified sampling and the method of purposive selection. 
   \emph{Journal of the Royal Statistical Society}, 97(4): 558-625.
-
-  Tschuprow, A. A. (1923). On the mathematical expectation of the moments of frequency distributions in the case of correlated observation.
+  
+  Tschuprow, A. A. (1923). On the mathematical expectation of the moments of frequency distributions in the case of correlated observation. 
   (Chapters 4-6). \emph{Metron}, 2: 646-683.
 }
 \examples{
@@ -58,24 +58,24 @@ sum(allocation_1$n)
 
 ## Example 2
 # Assume 5700 units is the maximum sample size to stick to our budget.
-# Looking at allocation_1$sensitivity we can see that most of the
+# Looking at allocation_1$sensitivity we can see that most of the 
 # sensitivity is in DOM1 for REG1 and REG2 due to V1.
 allocation_1$sensitivity
 # We can relax the constraints increasing the expected coefficients of variation for X1 by 10%
-errors1 <- errors
+errors1 <- errors 
 errors1[1,2] <- errors[1,2]+errors[1,2]*0.1
 
-# Try the new allocation
+# Try the new allocation 
 allocation_2 <- beat.1st(stratif=strata, errors=errors1)
 sum(allocation_2$n)
 
 ## Example 3
-# On the contrary, if we tighten the constraints decreasing the expected coefficients of variation
+# On the contrary, if we tighten the constraints decreasing the expected coefficients of variation 
 # for X1 by 10%
-errors2 <- errors
+errors2 <- errors 
 errors2[1,2] <- errors[1,2]-errors[1,2]*0.1
 
-# The new allocation leads to a larger sample than the first example
+# The new allocation leads to a larger sample than the first example 
 allocation_3 <- beat.1st(stratif=strata, errors=errors2)
 sum(allocation_3$n)
 }

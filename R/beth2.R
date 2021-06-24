@@ -3,12 +3,12 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
                      mmdiff_deft = 1, maxi = 20, epsilon = 10^(-11),
                     minnumstrat = 2, maxiter = 200, maxiter1 = 25)
 {
+  #globalVariables(test_stages)
   diffx = 999
   iterx = 0
   stages <- NULL
-  #assign("test_stages", 2, envir = .BaseNamespaceEnv)
-  test_stages<-NULL
-  test_stages<<-2
+  test_stages <- 2
+  # assign("test_stages", 2, envir = .BaseNamespaceEnv)
   param_alloc <- as.data.frame(t(c(epsilon, minnumstrat, maxiter,
                                    maxiter1, 
                                    epsilon1, diffx, iterx, mmdiff_deft,
@@ -63,9 +63,8 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
   param_alloc$nvar <- nvar
   param_alloc$ndom <- ndom
   param_alloc$nstrat <- nstrat
-  param_alloc <- param_alloc
-  #assign("param_alloc", param_alloc, envir = .BaseNamespaceEnv)
-  param_alloc<<-param_alloc
+  param_alloc <<- param_alloc
+#  assign("param_alloc", param_alloc, envir = .BaseNamespaceEnv)
   n_1st <- NULL
 
   ob<-beat.1st(stratif, errors)
@@ -193,8 +192,8 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
       output_beth12 <- list(i_diff_DEFT_fin = loopdeft,
                             i_S_DEFT_loop = infoloop, i_arnar_fin = des_file,
                             n_1st = n_1st)
-      #assign("output_beth12", output_beth12, envir = .BaseNamespaceEnv)
-      output_beth12<<-output_beth12
+      output_beth12 <<- output_beth12
+#      assign("output_beth12", output_beth12, envir = .BaseNamespaceEnv)
       des_file <- des_file[, c("STRATUM", "STRAT_MOS",
                                "MINIMUM", "DELTA")]
       des_file$CAMP <- n
@@ -220,16 +219,15 @@ beat.2st<-function (stratif, errors, des_file, psu_file, rho,
   Bethel_sample_n12 <- cbind(stratif[, c("STRATUM", "N", 
                        sapply(1:ndom,function(i) paste("DOM", i, sep = "")))], 
                        n_1st, n_2st)
-
-  #assign("test_stages", 0, envir = .BaseNamespaceEnv)
-  test_stages<<-0
+  test_stages <- 0
+#  assign("test_stages", 0, envir = .BaseNamespaceEnv)
   output_beth12$n2_st <- n_2st
   output_beth12$Bethel_sample_n12 <- (cbind(stratif[, c("STRATUM",
                                                         "N", sapply(1:ndom, function(i) paste("DOM", i, sep = "")))],
                                             n_1st, n_2st))
+  output_beth12 <<- output_beth12
+#  assign("output_beth12", output_beth12, envir = .BaseNamespaceEnv)
 
-  #assign("output_beth12", output_beth12, envir = .BaseNamespaceEnv)
-  output_beth12<<-output_beth12
   file_strata <- ob_fin$file_strata
   
   alloc <- ob_fin$alloc

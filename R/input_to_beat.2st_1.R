@@ -4,7 +4,13 @@
 # Author: Giulio Barcaroli
 #-----------------------------------------------------------
 
-input_to_beat.2st_1 <- function (RGdes, RGcal, id_PSU, id_SSU, strata_vars, target_vars, deff_vars, 
+input_to_beat.2st_1 <- function (RGdes, 
+                                 RGcal, 
+                                 id_PSU, 
+                                 id_SSU, 
+                                 strata_vars, 
+                                 target_vars, 
+                                 deff_vars, 
                                  domain_vars) 
 {
   #warning("The non-CRAN package, ReGenesees, is needed.")
@@ -40,12 +46,17 @@ input_to_beat.2st_1 <- function (RGdes, RGcal, id_PSU, id_SSU, strata_vars, targ
       }
     }
   }
-  
+  ##################### control of weights ####################
+  wgtcal <- colnames(RGcal$variables)[grep(".cal",colnames(RGcal$variables))]
+  if (length(wgtcal)==0) stop("No calibrated weights in RGcal calibrated object")
+  pos <- unlist(gregexpr(".cal", wgtcal)) 
+  wgtdes <- substr(wgtcal,1,(pos-1)) 
+  if (!(wgtdes %in% colnames(RGdes))) warning("No weights in RGdes calibrated object")
   #############################################################
   options(warn = -1)
   options(scipen = 9999)
   id_vars <- c(id_PSU,id_SSU)
-  RGcal$variables$wgts <- RGcal$variables$d.cal
+  # RGcal$variables$wgts <- RGcal$variables$d.cal
   sv1 <- NULL
   for (i in 1:(length(strata_vars))) {
     if (i < length(strata_vars)) 
@@ -69,8 +80,7 @@ input_to_beat.2st_1 <- function (RGdes, RGcal, id_PSU, id_SSU, strata_vars, targ
   }
   
   ####### Compute size of strata
-  st <- paste("N <- aggregate(wgts ~ ", sv1, ",RGcal$variables,FUN=sum)", 
-              sep = "")
+  st <- paste("N <- aggregate(",wgtcal," ~ ", sv1, ",RGcal$variables,FUN=sum)", sep = "")
   eval(parse(text = st))
   st <- "N$STRATUM <- paste0("
   for (i in 1:(length(strata_vars))) {
@@ -131,13 +141,13 @@ input_to_beat.2st_1 <- function (RGdes, RGcal, id_PSU, id_SSU, strata_vars, targ
     st <- paste0("sw <- class(RGcal$variables$",tvi,") == 'factor'")
     eval(parse(text=st))
     if (sw == FALSE) {
-      d <- RGcal$variables[, c(strata_vars, "wgts")]
+      d <- RGcal$variables[, c(strata_vars, wgtcal)]
       d$x2 <- RGcal$variables[, target_vars[i]]^2
-      st <- paste0("m <- aggregate(x2 * wgts ~", sv1, ", data=d, FUN=sum) / aggregate(wgts~", 
+      st <- paste0("m <- aggregate(x2 * ",wgtcal," ~ ", sv1, ", data=d, FUN=sum) / aggregate(",wgtcal," ~ ", 
                    sv1, ", data=d, FUN=sum)")
       eval(parse(text = st))
       d$x <- RGcal$variables[, target_vars[i]]
-      st <- paste0("m2 <- aggregate((x * wgts)~", sv1, ", data=d, FUN=sum) / aggregate(wgts~", 
+      st <- paste0("m2 <- aggregate((x * ",wgtcal,") ~ ", sv1, ", data=d, FUN=sum) / aggregate(",wgtcal," ~ ", 
                    sv1, ", data=d, FUN=sum)")
       eval(parse(text = st))
       st <- paste0("S$S",i," <- sqrt(m[,length(strata_vars)+1]-m2[,length(strata_vars)+1]^2)")
