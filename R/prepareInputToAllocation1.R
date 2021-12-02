@@ -1,9 +1,10 @@
 #-----------------------------------
 # Function to prepare inputs to 
 # allocation and PSU selection steps
+# (scenario 1)
 #-----------------------------------
 
-prepareInputToAllocation <- function( 
+prepareInputToAllocation1 <- function( 
   samp_frame,
   id_PSU,
   id_SSU,
@@ -13,19 +14,21 @@ prepareInputToAllocation <- function(
   domain_var,
   minimum,
   delta,
-  f,
   deff_sugg) 
 {
+  # initial sampling fraction
+  f = 0.05
   if (is.null(samp_frame$one)) samp_frame$one <- 1
 
   # strata
-  frame <- SamplingStrata::buildFrameDF(df=samp_frame,
+  cat("\nCalculating strata...")
+  frame <- buildFrameDF(df=samp_frame,
                         id=id_SSU,
                         X=strata_var,
                         Y=target_vars,
                         domainvalue=domain_var)
   nvarY <- length(grep("Y",colnames(frame)))
-  strata <- SamplingStrata::buildStrataDF(frame,progress=FALSE)
+  strata <- buildStrataDF(frame,progress=FALSE)
   strata$DOM2 <- strata$DOM1
   strata$DOM1 <- 1
   strata$STRATUM <- as.factor(strata$STRATO)
@@ -44,8 +47,10 @@ prepareInputToAllocation <- function(
   eval(parse(text=st))
   st <- paste0("b_nar <- aggregate(one ~ ",strata_var,", b_nar, FUN=mean)")
   eval(parse(text=st))
+  if (ncol(b_nar) > 1) colnames(b_nar)[1] <- "STRATUM"
+  if (ncol(b_nar) == 1) b_nar$STRATUM <- 1
   b_nar$one <- b_nar$one * f
-  deff <- merge(deff,b_nar,by.x="STRATUM",by.y="stratum")
+  deff <- merge(deff,b_nar,by="STRATUM")
   colnames(deff)[ncol(deff)] <- "b_nar"
   deff <- deff[order(as.numeric(as.character(deff$STRATUM))),]
 
@@ -59,17 +64,45 @@ prepareInputToAllocation <- function(
   }
   effst <- effst[order(as.numeric(as.character(effst$STRATUM))),]
 
-  # rho
-  rho <- deff
+  # rho ------------------------------------------------------------------
+  # rho <- deff
+  # for (i in c(1:nvarY)) {
+  #   st <- paste0("rho$RHO_AR",i," <- 1")
+  #   eval(parse(text=st))
+  #   st <- paste0("rho$RHO_NAR",i," <- (rho$DEFF", i, "-1)/(rho$b_nar-1)")
+  #   eval(parse(text=st))
+  # }
+  # rho$b_nar <- NULL
+  # rho[,grep("DEFF",colnames(rho))] <- NULL
+  # rho <- rho[order(as.numeric(as.character(rho$STRATUM))),]
+  cat("\nCalculating rho in strata...")
+  rho <- NULL
+  rho$STRATUM <- strata$STRATUM
+  rho <- as.data.frame(rho)
   for (i in c(1:nvarY)) {
-    st <- paste0("rho$RHO_AR",i," <- 1")
-    eval(parse(text=st))
-    st <- paste0("rho$RHO_NAR",i," <- (rho$DEFF", i, "-1)/(rho$b_nar-1)")
-    eval(parse(text=st))
+    eval(parse(text=paste0("rho$RHO_AR",i," <- 1")))
+    eval(parse(text=paste0("rho$RHO_NAR",i," <- NA")))
   }
-  rho$b_nar <- NULL
-  rho[,grep("DEFF",colnames(rho))] <- NULL
-  rho <- rho[order(as.numeric(as.character(rho$STRATUM))),]
+  L <- NULL
+  k <- 0
+  for (s in c(rho$STRATUM)) {
+    cat("\nStratum ",s)
+    k <- k+1
+    for (i in c(1:nvarY)) {
+      eval(parse(text=paste0("mu <- mean(samp_frame$",target_vars[i],"[samp_frame$",strata_var," == ",s,"])")))
+      eval(parse(text=paste0("D2y <- sum((samp_frame$",target_vars[i],"[samp_frame$",strata_var," == ",s,"]-mu)^2)")))
+      eval(parse(text=paste0("L <- unique(samp_frame$",id_PSU,"[samp_frame$",strata_var,"==s])")))
+      D2w <- 0
+      for (l in c(L)) {
+        eval(parse(text=paste0("mu_L <- mean(samp_frame$",target_vars[i],"[samp_frame$",id_PSU," == ",l,"])")))
+        eval(parse(text=paste0("D2w <- D2w + sum((samp_frame$",target_vars[i],"[samp_frame$",id_PSU," == ",l,"] - mu_L)^2)")))
+      }
+      eval(parse(text=paste0("rho$RHO_NAR",i,"[",k,"] <- 1 - (length(L) / (length(L) - 1) * (D2w / D2y))")))
+      eval(parse(text=paste0("rho$RHO_NAR",i,"[",k,"] <- 1 - (D2w / D2y)")))
+      
+    }
+  }
+  #------------------------------------------------------------------------
 
   # psu_file
   strat_mun <- samp_frame[,c(strata_var,id_PSU)]

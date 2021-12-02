@@ -1,25 +1,24 @@
-\name{select_SSU}
-\alias{select_SSU}
+\name{select_PSU}
+\alias{select_PSU}
 \title{
-Select sample of secondary stage units (SSU)
+Select sample of primary stage units (PSU)
 }
 \description{
-Select sample of secondary stage units (SSU) from the population frame on the basis of the SSU allocated to each selected PSU
+Select sample of primary stage units (PSU) on the basis of the PSU allocated in the allocation step.
 }
 \usage{
-     select_SSU(df,PSU_code,SSU_code,PSU_sampled,verbose)
+     select_PSU(alloc, type="ALLOC", pps=TRUE, plot=TRUE)
 }
 
 \arguments{
- \item{df}{Dataframe containing sampling units (SSUs)}
- \item{PSU_code}{Identifier of each PSU in dataframe containing sampling units}
- \item{SSU_code}{Identifier of each SSU in dataframe containing sampling units}
- \item{PSU_sampled}{Dataframe containing selected PSUs}
- \item{verbose}{Flag for producing output information while executing}
+ \item{alloc}{Output of the allocation step (beat.st)}
+ \item{type}{Type of SSU allocation ("ALLOC" = optimal, "PROP" = proportional to population size, "EQUAL" = equal size in each stratum)}
+ \item{pps}{Type of PSU selection in strata (pps = TRUE --> proportional to size, pps= FALSE--> simple random sampling)}
+  \item{plot}{If TRUE, a plot of PSUs and SSUs ditribution is produced}
 }
 
 \value{
-A dataframe containing the units selected in the sample
+A list including: universe_PSU, sample_PSU
 }
 
 \examples{
@@ -67,10 +66,7 @@ alloc <- beat.2st(stratif = inp$strata,
                    minnumstrat = 50
 )
 sample_1st <- select_PSU(alloc, type="ALLOC", pps=TRUE, plot=TRUE)
-samp <- select_SSU(df=pop,
-                   PSU_code="municipality",
-                   SSU_code="id_ind",
-                   PSU_sampled=sample_1st$sample_PSU)
+sample_1st$PSU_stats
 }
 }
-\author{Giulio Barcaroli}
+\author{Alessio Guandalini}

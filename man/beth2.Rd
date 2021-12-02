@@ -9,7 +9,7 @@ Compute multivariate optimal allocation for different domains corrected consider
 \usage{
 	beat.2st(stratif, errors, des_file, psu_file, rho, deft_start = NULL, 
     effst = NULL, epsilon1 = 5, mmdiff_deft = 1,maxi = 20, 
-    epsilon = 10^(-11), minnumstrat = 2, maxiter = 200, maxiter1 = 25)
+    epsilon = 10^(-11), minPSUstrat = 2, minnumstrat = 2, maxiter = 200, maxiter1 = 25)
 }
 \arguments{
  \item{stratif}{Data frame of survey strata, for more details see, e.g.,\link{strata}.}
@@ -23,6 +23,7 @@ Compute multivariate optimal allocation for different domains corrected consider
  \item{mmdiff_deft}{Second stop condition: defts differences beetween two iterations; iteration continues until the maximum of defts largest differences is greater than the default value. The default is 0.06.}
  \item{maxi}{Third stop condition: maximum number of allowed iterations. The default is 20.}
  \item{epsilon}{The same as in function \link{beat.1st}.}
+ \item{minPSUstrat}{Minimum number of non-self-represenative PSUs to be selected in each stratum.}
  \item{minnumstrat}{The same as in function \link{beat.1st}.}
  \item{maxiter}{The same as in function \link{beat.1st}.}
  \item{maxiter1}{The same as in function \link{beat.1st}.}
@@ -66,6 +67,7 @@ Object of class \code{list}. The list contains 8 objects:
   (Chapters 4-6). \emph{Metron}, 1923, 2: 646-683.
 }
 \examples{
+\dontrun{
 # Load example data
 data(beat.example)
 
@@ -106,7 +108,7 @@ design1[,4] <- 60
 allocation2st_4 <- beat.2st(stratif=strata, errors=errors2,
 des_file=design1, psu_file=PSU_strat, rho=rho)
 
-# The PSUs numer is decreased, while the SSUs number increased 
+# The PSUs number is decreased, while the SSUs number increased 
 # due to cluster intra-correlation effect.
 # Under the same expected errors, to offset a slight reduction of PSUs (from 221 to 207) 
 # an increase of SSUs involved is observed.
@@ -124,7 +126,6 @@ des_file=design2, psu_file=PSU_strat, rho=rho)
 allocation2st_4$expected
 allocation2st_5$expected
 
-# Note that MINIMUM can be different for each stratum.
 
 ## Example 6
 # Assume that the SSUs are in turn clusters, for instance households composed by individuals.
@@ -142,6 +143,53 @@ design3$DELTA <- 2.31
 # DELTA_IND=2.31, the average size of household in Italy.
 allocation2st_6 <- beat.2st(stratif=strata, errors=errors,
 des_file=design3, psu_file=PSU_strat, rho=rho)
+
+## Example 7
+# Complete workflow
+library(readr)
+pop <- read_rds("https://github.com/barcaroli/R2BEAT_workflows/blob/master/pop.RDS?raw=true")
+library(R2BEAT)
+cv <- as.data.frame(list(DOM=c("DOM1","DOM2"),
+                         CV1=c(0.02,0.03),
+                         CV2=c(0.03,0.06),
+                         CV3=c(0.03,0.06),
+                         CV4=c(0.05,0.08)))
+cv
+samp_frame <- pop
+samp_frame$one <- 1
+id_PSU <- "municipality"  
+id_SSU <- "id_ind"        
+strata_var <- "stratum"   
+target_vars <- c("income_hh","active","inactive","unemployed")   
+deff_var <- "stratum"     
+domain_var <- "region"  
+delta =  1       # households = survey units
+minimum <- 50    # minimum number of SSUs to be interviewed in each selected PSU
+deff_sugg <- 1.5 # suggestion for the deff value
+
+inp <- prepareInputToAllocation1(samp_frame,
+                                  id_PSU,
+                                  id_SSU,
+                                  strata_var,
+                                  target_vars,
+                                  deff_var,
+                                  domain_var,
+                                  minimum,
+                                  delta,
+                                  deff_sugg)
+inp$desfile$MINIMUM <- 50
+alloc <- beat.2st(stratif = inp$strata, 
+                   errors = cv, 
+                   des_file = inp$des_file, 
+                   psu_file = inp$psu_file, 
+                   rho = inp$rho, 
+                   deft_start = NULL,
+                   effst = inp$effst, 
+                   minPSUstrat = 2,
+                   minnumstrat = 50
+)
+
+}
 }
 \author{
 Developed by Stefano Falorsi, Andrea Fasulo, Alessio Guandalini, Daniela Pagliuca, Marco D. Terribili.

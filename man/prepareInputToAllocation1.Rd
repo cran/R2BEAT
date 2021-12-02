@@ -1,10 +1,10 @@
-\name{prepareInputToAllocation}
-\alias{prepareInputToAllocation}
+\name{prepareInputToAllocation1}
+\alias{prepareInputToAllocation1}
 \title{
 Input dataframes for R2BEAT two-stages sample design when sampling frame is available
 }
 \description{
-Prepares the following input dataframes for R2BEAT two-stages sample design starting from the sampling frame:
+In case of scenario 1 (no previous round of the survey available), prepares the following input dataframes for R2BEAT two-stages sample design starting from the sampling frame:
 1. strata
 2. deff
 3. effst
@@ -13,7 +13,7 @@ Prepares the following input dataframes for R2BEAT two-stages sample design star
 6. des_file
 }
 \usage{
-prepareInputToAllocation ( 
+prepareInputToAllocation1 ( 
   samp_frame,
   id_PSU,
   id_SSU,
@@ -23,7 +23,6 @@ prepareInputToAllocation (
   domain_var,
   minimum,
   delta,
-  f,
   deff_sugg) 
 }
 
@@ -37,20 +36,18 @@ prepareInputToAllocation (
  \item{domain_var}{the variable used to identify the domain of interest.}
  \item{minimum}{minimum number of SSU to be selected from a PSU.}
  \item{delta}{average number of analysis units per sampling unit.}
- \item{f}{expected (initial) sampling rate.}
  \item{deff_sugg}{suggested value of the deff.}
 }
 
+\value{
+A list containing  (i) the vector of allocated PSUs in the iterations and (ii) the vector of allocated SSUs in the iterations
+}
 
 \examples{
 \dontrun{
+library(readr)
+pop <- read_rds("https://github.com/barcaroli/R2BEAT_workflows/blob/master/pop.RDS?raw=true")
 library(R2BEAT)
-library(SamplingStrata)
-library(sampling)
-load("pop.RData")
-pop$active <- ifelse(pop$work==1,1,0)
-pop$inactive <- ifelse(pop$work==2,1,0)
-pop$one <- 1
 # parameters
 samp_frame <- pop
 id_PSU <- "municipality"  
@@ -63,20 +60,18 @@ minimum <- 50 # minimum number of SSUs to be interviewed in each selected PSU
 # average dimension of the SSU in terms of elementary survey units
 # delta =  nrow(pop) /length(unique(pop$id_hh))     
 delta =  1     
-f = 0.05 # sampling fraction (suggested)
 deff_sugg <- 1.5
 # prepare inputs
-inp <- prepareInputToAllocation(samp_frame,
-                                id_PSU,
-                                id_SSU,
-                                strata_var,
-                                target_vars,
-                                deff_var,
-                                domain_var,
-                                minimum,
-                                delta,
-                                f,
-                                deff_sugg)
+inp <- prepareInputToAllocation1(samp_frame,
+                                 id_PSU,
+                                 id_SSU,
+                                 strata_var,
+                                 target_vars,
+                                 deff_var,
+                                 domain_var,
+                                 minimum,
+                                 delta,
+                                 deff_sugg)
 }
 }
 \author{Giulio Barcaroli}
