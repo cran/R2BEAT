@@ -1,19 +1,35 @@
 select_PSU <- function (alloc, type = "ALLOC", pps = TRUE, plot = TRUE) 
 {
+  plot_PSUs <- function(des2) {
+    par(mfrow = c(2, 1))
+    barplot(PSU ~ SR + STRATUM, data = des2, main = "PSUs by strata", 
+            xlab = "strata", ylab = "PSUs", col = c("black", 
+                                                    "grey"), las = 2, cex.names = 0.7)
+    legend("topright", legend = c("Non Self Representative", 
+                                  "Self Representative"), cex = 0.5, fill = c("black", 
+                                                                              "grey"))
+    barplot(SSU ~ SR + STRATUM, data = des2, main = "SSUs by strata", 
+            xlab = "strata", ylab = "SSUs", col = c("black", 
+                                                    "grey"), las = 2, cex.names = 0.7)
+    legend("topright", legend = c("Non Self Representative", 
+                                  "Self Representative"), cex = 0.5, fill = c("black", 
+                                                                              "grey"))
+  }
   univ <- alloc$psu_trs
   if (length(unique(univ$PSU_ID)) < nrow(univ)) 
     stop("PSU identifier not unique")
   univ <- univ[order(univ$STRATUM, -univ$PSU_MOS), ]
   minPSUstr <- alloc$param_alloc$p_minPSUstrat
   minSSUstr <- alloc$param_alloc$p_minnumstrat
-  minimum <- alloc$param_alloc$minimum
+  minimum <- alloc$minimum
   univ$minPSUstr <- alloc$param_alloc$p_minPSUstrat
   univ$minSSUstr <- alloc$param_alloc$p_minnumstrat
   univ <- merge(univ, alloc$file_strata[, c("STRATUM", "N")], 
                 by = "STRATUM")
   univ <- merge(univ, alloc$alloc[-nrow(alloc$alloc), c("STRATUM", 
                                                         type)], by = "STRATUM")
-  univ$f <- univ[, type]/univ$N
+  colnames(univ)[ncol(univ)] <- "ALLOC"
+  univ$f <- univ[, "ALLOC"]/univ$N
   univ$THRESHOLD_NAR <- univ$THRESHOLD * univ$minPSUstr
   univ$partial <- 0
   univ$SUB[1] <- 1
@@ -139,8 +155,16 @@ select_PSU <- function (alloc, type = "ALLOC", pps = TRUE, plot = TRUE)
   sample_PSU <- merge(sample_PSU, PSU_substratum)
   sample_PSU$ALLOC_SUBSTR <- round(sample_PSU$ALLOC * sample_PSU$SUBSTRAT_MOS/sample_PSU$STRATUM_MOS)
   sample_PSU$PSU_final_sample_unit <- round(sample_PSU$ALLOC_SUBSTR/sample_PSU$PSU_substrat)
-  sample_PSU$PSU_final_sample_unit <- ifelse(sample_PSU$PSU_final_sample_unit < 
-                                               minimum, minimum, sample_PSU$PSU_final_sample_unit)
+  k <- 0
+  for (i in alloc$alloc$STRATUM[c(1:(nrow(alloc$alloc) - 1))]) {
+    k <- k + 1
+    sample_PSU$PSU_final_sample_unit[sample_PSU$STRATUM == 
+                                       i] <- ifelse(sample_PSU$PSU_final_sample_unit[sample_PSU$STRATUM == 
+                                                                                       i] < minimum[k], minimum[k], sample_PSU$PSU_final_sample_unit[sample_PSU$STRATUM == 
+                                                                                                                                                       i])
+  }
+  sample_PSU$PSU_final_sample_unit <- ifelse(sample_PSU$PSU_final_sample_unit > 
+                                               sample_PSU$PSU_MOS, sample_PSU$PSU_MOS, sample_PSU$PSU_final_sample_unit)
   sample_PSU$SR <- ifelse(sample_PSU$AR == 1, 1, 0)
   sample_PSU$nSR <- ifelse(sample_PSU$AR == 0, 1, 0)
   sample_PSU$stratum <- sample_PSU$SUBSTRAT
@@ -149,44 +173,50 @@ select_PSU <- function (alloc, type = "ALLOC", pps = TRUE, plot = TRUE)
   sample_PSU$weight_2st <- sample_PSU$PSU_MOS/sample_PSU$PSU_final_sample_unit
   sample_PSU$weight <- sample_PSU$weight_1st * sample_PSU$weight_2st
   sample_PSU <- sample_PSU[, c("PSU_ID", "STRATUM", "stratum", 
-                               "SR", "nSR", "PSU_final_sample_unit", "Pik", "weight_1st", 
-                               "weight_2st", "weight")]
+                               "PSU_MOS", "SR", "nSR", "PSU_final_sample_unit", "Pik", 
+                               "weight_1st", "weight_2st", "weight")]
   PSU_stats <- as.data.frame(table(sample_PSU$STRATUM))
   colnames(PSU_stats) <- c("STRATUM", "PSU")
-  PSU_SR <- as.data.frame(table(sample_PSU$STRATUM[sample_PSU$SR == 1]))
-      
+  PSU_SR <- as.data.frame(table(sample_PSU$STRATUM[sample_PSU$SR == 
+                                                     1]))
   if (nrow(PSU_SR) > 0) {
-      colnames(PSU_SR) <- c("STRATUM", "PSU_SR")
-      PSU_stats <- merge(PSU_stats, PSU_SR, all.x = TRUE)
+    colnames(PSU_SR) <- c("STRATUM", "PSU_SR")
+    PSU_stats <- merge(PSU_stats, PSU_SR, all.x = TRUE)
   }
   if (nrow(PSU_SR) == 0) {
-      PSU_stats$PSU_SR <- 0
+    PSU_stats$PSU_SR <- 0
   }
   PSU_stats$PSU_SR <- ifelse(is.na(PSU_stats$PSU_SR), 0, PSU_stats$PSU_SR)
   PSU_stats$PSU_NSR <- PSU_stats$PSU - PSU_stats$PSU_SR
   SSU <- aggregate(PSU_final_sample_unit ~ STRATUM, data = sample_PSU, 
                    sum)
   colnames(SSU)[2] <- "SSU"
-  if (nrow(PSU_SR) > 0) {
-    SSU_SR <- aggregate(PSU_final_sample_unit ~ STRATUM, data = sample_PSU[sample_PSU$SR == 1, ], sum)
+  data = sample_PSU[sample_PSU$SR == 1, ]
+  if (nrow(data) > 0) {
+    SSU_SR <- aggregate(PSU_final_sample_unit ~ STRATUM, 
+                        data = sample_PSU[sample_PSU$SR == 1, ], sum)
     colnames(SSU_SR)[2] <- "SSU_SR"
   }
-  SSU_NSR <- aggregate(PSU_final_sample_unit ~ STRATUM, data = sample_PSU[sample_PSU$nSR == 1, ], sum)
+  SSU_NSR <- aggregate(PSU_final_sample_unit ~ STRATUM, data = sample_PSU[sample_PSU$nSR == 
+                                                                            1, ], sum)
   colnames(SSU_NSR)[2] <- "SSU_NSR"
   PSU_stats <- merge(PSU_stats, SSU, all.x = T)
-  if (nrow(PSU_SR) > 0) PSU_stats <- merge(PSU_stats, SSU_SR, all.x = T)
-  if (nrow(PSU_SR) == 0) PSU_stats$SSU_SR <- 0
+  if (nrow(data) > 0) 
+    PSU_stats <- merge(PSU_stats, SSU_SR, all.x = T)
+  if (nrow(data) == 0) 
+    PSU_stats$SSU_SR <- 0
   PSU_stats <- merge(PSU_stats, SSU_NSR, all.x = T)
   PSU_stats$SSU_SR <- ifelse(is.na(PSU_stats$SSU_SR), 0, PSU_stats$SSU_SR)
   PSU_stats$SSU_NSR <- ifelse(is.na(PSU_stats$SSU_NSR), 0, 
                               PSU_stats$SSU_NSR)
   PSU_stats <- PSU_stats[order(as.numeric(as.character(PSU_stats$STRATUM))), 
   ]
-  PSU_stats <- rbind(PSU_stats, rep(NA, 8))
+  PSU_stats <- rbind(PSU_stats, rep(NA, ncol(PSU_stats)))
   PSU_stats$STRATUM <- as.character(PSU_stats$STRATUM)
   PSU_stats[nrow(PSU_stats), 1] <- "Total"
   PSU_stats[nrow(PSU_stats), c(2:7)] <- colSums(PSU_stats[-nrow(PSU_stats), 
                                                           2:7])
+  
   if (plot == TRUE) {
     des <- PSU_stats[-nrow(PSU_stats), ]
     des2 <- NULL
@@ -201,21 +231,13 @@ select_PSU <- function (alloc, type = "ALLOC", pps = TRUE, plot = TRUE)
     des2$PSU[c(nrow(PSU_stats):nrow(des2))] <- des$PSU_NSR
     des2$SSU[c(1:(nrow(PSU_stats) - 1))] <- des$SSU_SR
     des2$SSU[c(nrow(PSU_stats):nrow(des2))] <- des$SSU_NSR
-    # des2$STRATUM <- as.numeric(des2$STRATUM)
     des2
-    par(mfrow = c(2, 1))
-    barplot(PSU ~ SR + STRATUM, data = des2, main = "PSUs by strata", 
-            xlab = "strata", ylab = "PSUs", col = c("black", 
-                                                    "grey"), las = 2, cex.names = 0.7)
-    legend("topright", legend = c("Non Self Representative", 
-                                  "Self Representative"), cex = 0.7, fill = c("black", 
-                                                                              "grey"))
-    barplot(SSU ~ SR + STRATUM, data = des2, main = "SSUs by strata", 
-            xlab = "strata", ylab = "SSUs", col = c("black", 
-                                                    "grey"), las = 2, cex.names = 0.7)
-    legend("topright", legend = c("Non Self Representative", 
-                                  "Self Representative"), cex = 0.7, fill = c("black", 
-                                                                              "grey"))
+    result <- try(plot_PSUs(des2),silent=TRUE)
+    if (is(result)[1] == "try-error") {
+      dev.new()
+      plot_PSUs(des2)
+      # dev.off()
+    }
   }
   out <- list(universe_PSU = universe_PSU, sample_PSU = sample_PSU, 
               PSU_stats = PSU_stats[, c("STRATUM", "PSU", "PSU_SR", 
